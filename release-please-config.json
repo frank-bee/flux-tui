@@ -1,14 +1,19 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
-  "release-type": "rust",
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
   "include-v-in-tag": true,
+  "bootstrap-sha": "47a22882c4aae23415e0880cdb944ebff7be8d71",
   "changelog-sections": [
     { "type": "feat", "section": "Features" },
     { "type": "fix", "section": "Bug Fixes" },
     { "type": "perf", "section": "Performance Improvements" },
     { "type": "docs", "section": "Documentation" },
     { "type": "chore", "section": "Miscellaneous", "hidden": true }
-  ]
+  ],
+  "packages": {
+    ".": {
+      "release-type": "rust"
+    }
+  }
 }
