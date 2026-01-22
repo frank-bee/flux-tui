@@ -1,6 +1,7 @@
 # flux-tui
 
 [![CI](https://github.com/frank-bee/flux-tui/actions/workflows/ci.yml/badge.svg)](https://github.com/frank-bee/flux-tui/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/frank-bee/flux-tui)](https://github.com/frank-bee/flux-tui/releases)
 
 A minimalist, modern terminal UI for managing [Flux CD](https://fluxcd.io/) resources.
 
