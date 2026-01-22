@@ -84,7 +84,8 @@ jobs:
       - name: Download release assets
         run: |
           VERSION="${{ github.event.release.tag_name || inputs.tag_name }}"
-          VERSION_NUM="${VERSION#v}"
+          # Strip flux-tui-v prefix to get version number (e.g., flux-tui-v0.1.1 -> 0.1.1)
+          VERSION_NUM="${VERSION#flux-tui-v}"
 
           # Download macOS binaries and checksums
           curl -L -o flux-tui-x86_64-apple-darwin.tar.gz.sha256 \
@@ -102,6 +103,7 @@ jobs:
           SHA_LINUX_X86=$(cut -d ' ' -f 1 flux-tui-x86_64-unknown-linux-gnu.tar.gz.sha256)
           SHA_LINUX_ARM=$(cut -d ' ' -f 1 flux-tui-aarch64-unknown-linux-gnu.tar.gz.sha256)
 
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "VERSION_NUM=${VERSION_NUM}" >> $GITHUB_ENV
           echo "SHA_MACOS_X86=${SHA_MACOS_X86}" >> $GITHUB_ENV
           echo "SHA_MACOS_ARM=${SHA_MACOS_ARM}" >> $GITHUB_ENV
@@ -126,22 +128,22 @@ jobs:
 
             on_macos do
               on_intel do
-                url "https://github.com/frank-bee/flux-tui/releases/download/v${{ env.VERSION_NUM }}/flux-tui-x86_64-apple-darwin.tar.gz"
+                url "https://github.com/frank-bee/flux-tui/releases/download/${{ env.VERSION }}/flux-tui-x86_64-apple-darwin.tar.gz"
                 sha256 "${{ env.SHA_MACOS_X86 }}"
               end
               on_arm do
-                url "https://github.com/frank-bee/flux-tui/releases/download/v${{ env.VERSION_NUM }}/flux-tui-aarch64-apple-darwin.tar.gz"
+                url "https://github.com/frank-bee/flux-tui/releases/download/${{ env.VERSION }}/flux-tui-aarch64-apple-darwin.tar.gz"
                 sha256 "${{ env.SHA_MACOS_ARM }}"
               end
             end
 
             on_linux do
               on_intel do
-                url "https://github.com/frank-bee/flux-tui/releases/download/v${{ env.VERSION_NUM }}/flux-tui-x86_64-unknown-linux-gnu.tar.gz"
+                url "https://github.com/frank-bee/flux-tui/releases/download/${{ env.VERSION }}/flux-tui-x86_64-unknown-linux-gnu.tar.gz"
                 sha256 "${{ env.SHA_LINUX_X86 }}"
               end
               on_arm do
-                url "https://github.com/frank-bee/flux-tui/releases/download/v${{ env.VERSION_NUM }}/flux-tui-aarch64-unknown-linux-gnu.tar.gz"
+                url "https://github.com/frank-bee/flux-tui/releases/download/${{ env.VERSION }}/flux-tui-aarch64-unknown-linux-gnu.tar.gz"
                 sha256 "${{ env.SHA_LINUX_ARM }}"
               end
             end
