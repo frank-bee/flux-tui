@@ -47,10 +47,11 @@ cd flux-tui
 cargo install --path .
 ```
 
-### With Homebrew (coming soon)
+### With Homebrew
 
 ```bash
-brew install frank-bee/tap/flux-tui
+brew tap frank-bee/tap
+brew install flux-tui
 ```
 
 ## Prerequisites
