@@ -12,6 +12,7 @@ use std::io;
 use std::time::Duration;
 
 use app::{actions::Action, state::App};
+use clap::Parser;
 use color_eyre::Result;
 use crossterm::{
     event::{poll, read, DisableMouseCapture, EnableMouseCapture, Event, KeyEventKind},
@@ -26,8 +27,17 @@ const TICK_RATE: Duration = Duration::from_millis(250);
 /// Data refresh interval
 const REFRESH_INTERVAL: Duration = Duration::from_secs(5);
 
+/// A minimalist TUI for managing Flux CD resources
+#[derive(Parser)]
+#[command(name = "flux-tui")]
+#[command(version, about, long_about = None)]
+struct Args {}
+
 #[tokio::main]
 async fn main() -> Result<()> {
+    // Parse CLI arguments (handles --version and --help automatically)
+    Args::parse();
+
     // Initialize error handling
     color_eyre::install()?;
 
