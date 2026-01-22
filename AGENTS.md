@@ -104,6 +104,70 @@ RUST_LOG=debug cargo run
 cargo test
 ```
 
+### Interactive TUI Testing with MCP
+
+Use the `tui-driver` MCP server to test the TUI interactively. This allows automated testing of the UI without manual interaction.
+
+#### Launch the app
+
+```
+mcp__tui-driver__tui_launch
+  command: /path/to/flux-tui/target/release/flux-tui
+  cols: 120
+  rows: 30
+```
+
+#### Take screenshots
+
+```
+mcp__tui-driver__tui_screenshot
+  session_id: <session_id>
+```
+
+**Note:** Screenshots are base64-encoded PNG images and fill context quickly. Prefer using `tui_text` for verification when possible, and only use screenshots when visual verification is needed.
+
+#### Get text content
+
+```
+mcp__tui-driver__tui_text
+  session_id: <session_id>
+```
+
+#### Send key presses
+
+```
+mcp__tui-driver__tui_press_key
+  session_id: <session_id>
+  key: j          # Navigate down
+  key: k          # Navigate up
+  key: l          # Next tab
+  key: h          # Previous tab
+  key: Enter      # Show details
+  key: n          # Namespace filter
+  key: r          # Reconcile
+  key: q          # Quit
+  key: Escape     # Close popup
+```
+
+#### Close session
+
+```
+mcp__tui-driver__tui_close
+  session_id: <session_id>
+```
+
+#### Example Test Flow
+
+1. Launch app with `tui_launch`
+2. Take screenshot to verify initial state
+3. Press `j` to navigate, verify with `tui_text`
+4. Press `l` to switch tabs, take screenshot
+5. Press `Enter` to view details, verify popup
+6. Press `Escape` to close popup
+7. Press `n` to test namespace filter
+8. Press `q` to quit
+9. Close session with `tui_close`
+
 ### Format & Lint
 
 ```bash

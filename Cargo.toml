@@ -3,9 +3,9 @@ name = "flux-tui"
 version = "0.1.0"
 edition = "2021"
 description = "A minimalist TUI for managing Flux CD resources"
-authors = ["Quantum Machines"]
+authors = ["Frank Bernhardt"]
 license = "MIT"
-repository = "https://github.com/qm-labs/flux-tui"
+repository = "https://github.com/frank-bee/flux-tui"
 keywords = ["flux", "kubernetes", "tui", "gitops"]
 categories = ["command-line-utilities"]
 

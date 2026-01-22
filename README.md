@@ -39,7 +39,7 @@ A minimalist, modern terminal UI for managing [Flux CD](https://fluxcd.io/) reso
 
 ```bash
 # Clone the repository
-git clone https://github.com/qm-labs/flux-tui.git
+git clone https://github.com/frank-bee/flux-tui.git
 cd flux-tui
 
 # Build and install
@@ -49,7 +49,7 @@ cargo install --path .
 ### With Homebrew (coming soon)
 
 ```bash
-brew install qm-labs/tap/flux-tui
+brew install frank-bee/tap/flux-tui
 ```
 
 ## Prerequisites
