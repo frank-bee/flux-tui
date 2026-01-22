@@ -169,3 +169,120 @@ pub mod styles {
         Style::default().fg(ui::TEXT_MUTED)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_status_colors() {
+        assert_eq!(status::READY, Color::Rgb(34, 197, 94));
+        assert_eq!(status::FAILED, Color::Rgb(239, 68, 68));
+        assert_eq!(status::RECONCILING, Color::Rgb(245, 158, 11));
+        assert_eq!(status::SUSPENDED, Color::Rgb(107, 114, 128));
+        assert_eq!(status::UNKNOWN, Color::Rgb(148, 163, 184));
+    }
+
+    #[test]
+    fn test_ui_colors() {
+        assert_eq!(ui::PRIMARY, Color::Rgb(59, 130, 246));
+        assert_eq!(ui::BORDER, Color::Rgb(71, 85, 105));
+        assert_eq!(ui::BORDER_HIGHLIGHT, Color::Rgb(59, 130, 246));
+        assert_eq!(ui::TEXT, Color::Rgb(226, 232, 240));
+        assert_eq!(ui::TEXT_MUTED, Color::Rgb(148, 163, 184));
+        assert_eq!(ui::SELECTION_BG, Color::Rgb(30, 41, 59));
+        assert_eq!(ui::TAB_ACTIVE_BG, Color::Rgb(30, 58, 138));
+        assert_eq!(ui::HEADER_BG, Color::Rgb(15, 23, 42));
+    }
+
+    #[test]
+    fn test_icons() {
+        assert_eq!(icons::READY, "✓");
+        assert_eq!(icons::FAILED, "✗");
+        assert_eq!(icons::RECONCILING, "●");
+        assert_eq!(icons::SUSPENDED, "⏸");
+        assert_eq!(icons::UNKNOWN, "?");
+    }
+
+    #[test]
+    fn test_styles_text() {
+        let style = styles::text();
+        assert_eq!(style.fg, Some(ui::TEXT));
+    }
+
+    #[test]
+    fn test_styles_muted() {
+        let style = styles::muted();
+        assert_eq!(style.fg, Some(ui::TEXT_MUTED));
+    }
+
+    #[test]
+    fn test_styles_header() {
+        let style = styles::header();
+        assert_eq!(style.fg, Some(ui::TEXT));
+        assert_eq!(style.bg, Some(ui::HEADER_BG));
+        assert!(style.add_modifier.contains(Modifier::BOLD));
+    }
+
+    #[test]
+    fn test_styles_selected() {
+        let style = styles::selected();
+        assert_eq!(style.bg, Some(ui::SELECTION_BG));
+        assert_eq!(style.fg, Some(ui::TEXT));
+    }
+
+    #[test]
+    fn test_styles_border() {
+        let style = styles::border();
+        assert_eq!(style.fg, Some(ui::BORDER));
+    }
+
+    #[test]
+    fn test_styles_border_highlight() {
+        let style = styles::border_highlight();
+        assert_eq!(style.fg, Some(ui::BORDER_HIGHLIGHT));
+    }
+
+    #[test]
+    fn test_styles_tab() {
+        let style = styles::tab();
+        assert_eq!(style.fg, Some(ui::TEXT_MUTED));
+    }
+
+    #[test]
+    fn test_styles_tab_active() {
+        let style = styles::tab_active();
+        assert_eq!(style.fg, Some(ui::TEXT));
+        assert_eq!(style.bg, Some(ui::TAB_ACTIVE_BG));
+        assert!(style.add_modifier.contains(Modifier::BOLD));
+    }
+
+    #[test]
+    fn test_styles_status() {
+        assert_eq!(styles::status_ready().fg, Some(status::READY));
+        assert_eq!(styles::status_failed().fg, Some(status::FAILED));
+        assert_eq!(styles::status_reconciling().fg, Some(status::RECONCILING));
+        assert_eq!(styles::status_suspended().fg, Some(status::SUSPENDED));
+        assert_eq!(styles::status_unknown().fg, Some(status::UNKNOWN));
+    }
+
+    #[test]
+    fn test_styles_title() {
+        let style = styles::title();
+        assert_eq!(style.fg, Some(ui::PRIMARY));
+        assert!(style.add_modifier.contains(Modifier::BOLD));
+    }
+
+    #[test]
+    fn test_styles_key() {
+        let style = styles::key();
+        assert_eq!(style.fg, Some(ui::PRIMARY));
+        assert!(style.add_modifier.contains(Modifier::BOLD));
+    }
+
+    #[test]
+    fn test_styles_key_desc() {
+        let style = styles::key_desc();
+        assert_eq!(style.fg, Some(ui::TEXT_MUTED));
+    }
+}

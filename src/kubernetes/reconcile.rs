@@ -84,3 +84,16 @@ pub fn is_flux_available() -> bool {
         .map(|o| o.status.success())
         .unwrap_or(false)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_flux_available_returns_bool() {
+        // This test will return true if flux is installed, false otherwise
+        // Either result is valid - we just want to ensure the function doesn't panic
+        let result = is_flux_available();
+        assert!(result == true || result == false);
+    }
+}

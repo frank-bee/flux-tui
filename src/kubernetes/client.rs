@@ -165,3 +165,54 @@ fn parse_api_version(api_version: &str) -> (&str, &str) {
         ("", api_version)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_api_version_with_group() {
+        let (group, version) = parse_api_version("kustomize.toolkit.fluxcd.io/v1");
+        assert_eq!(group, "kustomize.toolkit.fluxcd.io");
+        assert_eq!(version, "v1");
+    }
+
+    #[test]
+    fn test_parse_api_version_with_v2() {
+        let (group, version) = parse_api_version("helm.toolkit.fluxcd.io/v2");
+        assert_eq!(group, "helm.toolkit.fluxcd.io");
+        assert_eq!(version, "v2");
+    }
+
+    #[test]
+    fn test_parse_api_version_without_group() {
+        let (group, version) = parse_api_version("v1");
+        assert_eq!(group, "");
+        assert_eq!(version, "v1");
+    }
+
+    #[test]
+    fn test_parse_api_version_apps_v1() {
+        let (group, version) = parse_api_version("apps/v1");
+        assert_eq!(group, "apps");
+        assert_eq!(version, "v1");
+    }
+
+    #[test]
+    fn test_kustomization_api_constant() {
+        assert_eq!(KUSTOMIZATION_API.0, "kustomize.toolkit.fluxcd.io/v1");
+        assert_eq!(KUSTOMIZATION_API.1, "Kustomization");
+    }
+
+    #[test]
+    fn test_helmrelease_api_constant() {
+        assert_eq!(HELMRELEASE_API.0, "helm.toolkit.fluxcd.io/v2");
+        assert_eq!(HELMRELEASE_API.1, "HelmRelease");
+    }
+
+    #[test]
+    fn test_helmchart_api_constant() {
+        assert_eq!(HELMCHART_API.0, "source.toolkit.fluxcd.io/v1");
+        assert_eq!(HELMCHART_API.1, "HelmChart");
+    }
+}

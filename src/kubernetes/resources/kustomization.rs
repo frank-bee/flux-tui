@@ -34,15 +34,26 @@ pub struct Kustomization {
 
 impl Kustomization {
     /// Create a new Kustomization from raw K8s data
-    pub fn from_kube(name: String, namespace: String, spec: &serde_json::Value, status: &serde_json::Value) -> Self {
-        let suspended = spec.get("suspend").and_then(|v| v.as_bool()).unwrap_or(false);
+    pub fn from_kube(
+        name: String,
+        namespace: String,
+        spec: &serde_json::Value,
+        status: &serde_json::Value,
+    ) -> Self {
+        let suspended = spec
+            .get("suspend")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
 
         let source_ref = spec
             .get("sourceRef")
-            .and_then(|sr| {
-                let kind = sr.get("kind").and_then(|k| k.as_str()).unwrap_or("GitRepository");
+            .map(|sr| {
+                let kind = sr
+                    .get("kind")
+                    .and_then(|k| k.as_str())
+                    .unwrap_or("GitRepository");
                 let name = sr.get("name").and_then(|n| n.as_str()).unwrap_or("unknown");
-                Some(format!("{}/{}", kind, name))
+                format!("{}/{}", kind, name)
             })
             .unwrap_or_else(|| "unknown".to_string());
 
@@ -55,7 +66,7 @@ impl Kustomization {
         let revision = status
             .get("lastAppliedRevision")
             .and_then(|r| r.as_str())
-            .map(|s| truncate_revision(s));
+            .map(truncate_revision);
 
         let (resource_status, status_message) = parse_status(status, suspended);
 
@@ -159,4 +170,233 @@ fn truncate_revision(revision: &str) -> String {
     }
     // Just return first 12 chars
     revision.chars().take(12).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_truncate_revision_with_branch_and_sha() {
+        let revision = "main@abc1234567890";
+        assert_eq!(truncate_revision(revision), "main@abc1234");
+    }
+
+    #[test]
+    fn test_truncate_revision_short_sha() {
+        let revision = "main@abc";
+        assert_eq!(truncate_revision(revision), "main@abc");
+    }
+
+    #[test]
+    fn test_truncate_revision_no_at_sign() {
+        let revision = "abc1234567890xyz";
+        assert_eq!(truncate_revision(revision), "abc123456789");
+    }
+
+    #[test]
+    fn test_truncate_revision_short_no_at() {
+        let revision = "short";
+        assert_eq!(truncate_revision(revision), "short");
+    }
+
+    #[test]
+    fn test_parse_status_suspended() {
+        let status = json!({});
+        let (resource_status, message) = parse_status(&status, true);
+        assert_eq!(resource_status, ResourceStatus::Suspended);
+        assert_eq!(message, "Suspended");
+    }
+
+    #[test]
+    fn test_parse_status_ready() {
+        let status = json!({
+            "conditions": [
+                {
+                    "type": "Ready",
+                    "status": "True",
+                    "message": "Applied revision: main@abc1234"
+                }
+            ]
+        });
+        let (resource_status, message) = parse_status(&status, false);
+        assert_eq!(resource_status, ResourceStatus::Ready);
+        assert_eq!(message, "Applied revision: main@abc1234");
+    }
+
+    #[test]
+    fn test_parse_status_failed() {
+        let status = json!({
+            "conditions": [
+                {
+                    "type": "Ready",
+                    "status": "False",
+                    "reason": "ReconciliationFailed",
+                    "message": "kustomization error"
+                }
+            ]
+        });
+        let (resource_status, message) = parse_status(&status, false);
+        assert_eq!(resource_status, ResourceStatus::Failed);
+        assert_eq!(message, "kustomization error");
+    }
+
+    #[test]
+    fn test_parse_status_progressing() {
+        let status = json!({
+            "conditions": [
+                {
+                    "type": "Ready",
+                    "status": "False",
+                    "reason": "Progressing",
+                    "message": "Reconciliation in progress"
+                }
+            ]
+        });
+        let (resource_status, message) = parse_status(&status, false);
+        assert_eq!(resource_status, ResourceStatus::Reconciling);
+        assert_eq!(message, "Reconciliation in progress");
+    }
+
+    #[test]
+    fn test_parse_status_unknown_ready_status() {
+        let status = json!({
+            "conditions": [
+                {
+                    "type": "Ready",
+                    "status": "Unknown",
+                    "message": "Waiting for reconciliation"
+                }
+            ]
+        });
+        let (resource_status, message) = parse_status(&status, false);
+        assert_eq!(resource_status, ResourceStatus::Reconciling);
+        assert_eq!(message, "Waiting for reconciliation");
+    }
+
+    #[test]
+    fn test_parse_status_reconciling_condition() {
+        let status = json!({
+            "conditions": [
+                {
+                    "type": "Reconciling",
+                    "status": "True",
+                    "message": "Reconciling"
+                }
+            ]
+        });
+        let (resource_status, message) = parse_status(&status, false);
+        assert_eq!(resource_status, ResourceStatus::Reconciling);
+        assert_eq!(message, "Reconciling");
+    }
+
+    #[test]
+    fn test_parse_status_no_conditions() {
+        let status = json!({});
+        let (resource_status, message) = parse_status(&status, false);
+        assert_eq!(resource_status, ResourceStatus::Unknown);
+        assert_eq!(message, "Status unknown");
+    }
+
+    #[test]
+    fn test_parse_status_empty_conditions() {
+        let status = json!({"conditions": []});
+        let (resource_status, message) = parse_status(&status, false);
+        assert_eq!(resource_status, ResourceStatus::Unknown);
+        assert_eq!(message, "Status unknown");
+    }
+
+    #[test]
+    fn test_kustomization_from_kube_basic() {
+        let spec = json!({
+            "sourceRef": {
+                "kind": "GitRepository",
+                "name": "my-repo"
+            },
+            "path": "./clusters/production"
+        });
+        let status = json!({
+            "lastAppliedRevision": "main@abc1234567890",
+            "conditions": [
+                {
+                    "type": "Ready",
+                    "status": "True",
+                    "message": "Applied"
+                }
+            ]
+        });
+
+        let k = Kustomization::from_kube(
+            "my-app".to_string(),
+            "flux-system".to_string(),
+            &spec,
+            &status,
+        );
+
+        assert_eq!(k.name, "my-app");
+        assert_eq!(k.namespace, "flux-system");
+        assert_eq!(k.status, ResourceStatus::Ready);
+        assert_eq!(k.revision, Some("main@abc1234".to_string()));
+        assert!(!k.suspended);
+    }
+
+    #[test]
+    fn test_kustomization_from_kube_suspended() {
+        let spec = json!({
+            "suspend": true,
+            "sourceRef": {
+                "name": "my-repo"
+            },
+            "path": "./"
+        });
+        let status = json!({});
+
+        let k = Kustomization::from_kube(
+            "suspended-app".to_string(),
+            "default".to_string(),
+            &spec,
+            &status,
+        );
+
+        assert!(k.suspended);
+        assert_eq!(k.status, ResourceStatus::Suspended);
+    }
+
+    #[test]
+    fn test_kustomization_from_kube_defaults() {
+        let spec = json!({});
+        let status = json!({});
+
+        let k =
+            Kustomization::from_kube("minimal".to_string(), "default".to_string(), &spec, &status);
+
+        assert_eq!(k.source_ref, "unknown");
+        assert_eq!(k.path, "./");
+        assert_eq!(k.revision, None);
+        assert!(!k.suspended);
+    }
+
+    #[test]
+    fn test_kustomization_flux_resource_trait() {
+        let k = Kustomization {
+            name: "test".to_string(),
+            namespace: "ns".to_string(),
+            status: ResourceStatus::Ready,
+            status_message: "OK".to_string(),
+            revision: Some("rev".to_string()),
+            suspended: false,
+            source_ref: "GitRepository/test".to_string(),
+            path: "./".to_string(),
+        };
+
+        assert_eq!(k.name(), "test");
+        assert_eq!(k.namespace(), "ns");
+        assert_eq!(k.kind(), "Kustomization");
+        assert_eq!(k.status(), &ResourceStatus::Ready);
+        assert_eq!(k.status_message(), "OK");
+        assert!(k.is_ready());
+        assert!(!k.is_suspended());
+        assert_eq!(k.revision(), Some("rev"));
+    }
 }

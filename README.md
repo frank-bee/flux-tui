@@ -1,5 +1,7 @@
 # flux-tui
 
+[![CI](https://github.com/qm-labs/flux-tui/actions/workflows/ci.yml/badge.svg)](https://github.com/qm-labs/flux-tui/actions/workflows/ci.yml)
+
 A minimalist, modern terminal UI for managing [Flux CD](https://fluxcd.io/) resources.
 
 ```

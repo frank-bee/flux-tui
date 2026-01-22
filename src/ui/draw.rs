@@ -35,11 +35,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
 
 /// Draw the header bar
 fn draw_header(frame: &mut Frame, area: Rect, app: &App) {
-    let ns_display = app
-        .namespace_filter
-        .as_ref()
-        .map(|s| s.as_str())
-        .unwrap_or("all");
+    let ns_display = app.namespace_filter.as_deref().unwrap_or("all");
 
     let header_text = format!(
         " flux-tui                                              cluster: {} │ ns: {}",
@@ -138,7 +134,10 @@ fn draw_namespace_popup(frame: &mut Frame, namespaces: &[String], selected: usiz
 }
 
 /// Draw resource details popup
-fn draw_details_popup(frame: &mut Frame, resource: &dyn crate::kubernetes::resources::FluxResource) {
+fn draw_details_popup(
+    frame: &mut Frame,
+    resource: &dyn crate::kubernetes::resources::FluxResource,
+) {
     let area = popup_area(frame.area(), 70, 70);
 
     frame.render_widget(Clear, area);
@@ -202,7 +201,11 @@ fn draw_error_popup(frame: &mut Frame, message: &str) {
 
     let block = Block::default()
         .title(" Error ")
-        .title_style(Style::default().fg(crate::ui::theme::status::FAILED).add_modifier(Modifier::BOLD))
+        .title_style(
+            Style::default()
+                .fg(crate::ui::theme::status::FAILED)
+                .add_modifier(Modifier::BOLD),
+        )
         .borders(Borders::ALL)
         .border_style(Style::default().fg(crate::ui::theme::status::FAILED));
 
