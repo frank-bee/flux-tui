@@ -14,3 +14,7 @@ Thumbs.db
 
 # Debug
 *.log
+
+# Ralph files
+ralph-*.txt
+ralph-*.md
