@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/frank-bee/flux-tui/compare/flux-tui-v0.1.2...flux-tui-v0.1.3) (2026-01-22)
+
+
+### Documentation
+
+* update Homebrew installation instructions ([49a8d0b](https://github.com/frank-bee/flux-tui/commit/49a8d0b05828d4e7d40e1aa8453c2624aa9fe0ec))
+
 ## [0.1.2](https://github.com/frank-bee/flux-tui/compare/flux-tui-v0.1.1...flux-tui-v0.1.2) (2026-01-22)
 
 
